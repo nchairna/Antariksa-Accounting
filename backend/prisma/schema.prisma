@@ -1,0 +1,849 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Tenant {
+  id               String           @id @default(uuid())
+  code             String           @unique
+  name             String
+  domain           String?          @unique
+  status           TenantStatus     @default(ACTIVE)
+  subscriptionTier SubscriptionTier @default(STANDARD)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  deletedAt        DateTime?
+  roles            Role[]
+  settings         TenantSetting[]
+  users            User[]
+  sessions         UserSession[]
+  categories       Category[]
+  items            Item[]
+  customers        Customer[]
+  customerAddresses CustomerAddress[]
+  suppliers        Supplier[]
+  supplierAddresses SupplierAddress[]
+  inventoryLocations InventoryLocation[]
+  itemInventories  ItemInventory[]
+  stockMovements   StockMovement[]
+  purchaseOrders   PurchaseOrder[]
+  purchaseOrderLines PurchaseOrderLine[]
+  salesOrders      SalesOrder[]
+  salesOrderLines  SalesOrderLine[]
+  salesInvoices    SalesInvoice[]
+  salesInvoiceLines SalesInvoiceLine[]
+  purchaseInvoices PurchaseInvoice[]
+  purchaseInvoiceLines PurchaseInvoiceLine[]
+  payments        Payment[]
+  paymentAllocations PaymentAllocation[]
+}
+
+model TenantSetting {
+  id        String   @id @default(uuid())
+  tenantId  String
+  key       String
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, key])
+  @@index([tenantId])
+}
+
+model Role {
+  id           String           @id @default(uuid())
+  tenantId     String
+  name         String
+  description  String?
+  isSystemRole Boolean          @default(false)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  tenant       Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  permissions  RolePermission[]
+  users        User[]
+
+  @@unique([tenantId, name])
+  @@index([tenantId])
+}
+
+model Permission {
+  id          String           @id @default(uuid())
+  name        String           @unique
+  resource    String
+  action      String
+  description String?
+  roles       RolePermission[]
+}
+
+model RolePermission {
+  id           String     @id @default(uuid())
+  roleId       String
+  permissionId String
+  createdAt    DateTime   @default(now())
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+}
+
+model User {
+  id              String        @id @default(uuid())
+  tenantId        String
+  roleId          String?
+  email           String
+  username        String
+  passwordHash    String
+  firstName       String
+  lastName        String
+  phone           String?
+  status          UserStatus    @default(ACTIVE)
+  lastLoginAt     DateTime?
+  emailVerifiedAt DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  deletedAt       DateTime?
+  role            Role?         @relation(fields: [roleId], references: [id])
+  tenant          Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  sessions        UserSession[]
+  stockMovements  StockMovement[]
+  purchaseOrders  PurchaseOrder[]
+  salesOrders     SalesOrder[]
+  salesInvoices   SalesInvoice[]
+  purchaseInvoices PurchaseInvoice[]
+  approvedPurchaseInvoices PurchaseInvoice[] @relation("PurchaseInvoiceApprovedBy")
+  payments        Payment[]
+  approvedPayments Payment[] @relation("PaymentApprovedBy")
+
+  @@unique([tenantId, email])
+  @@unique([tenantId, username])
+  @@index([tenantId])
+}
+
+model UserSession {
+  id        String   @id @default(uuid())
+  userId    String
+  tenantId  String
+  token     String   @unique
+  ipAddress String?
+  userAgent String?
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([userId])
+}
+
+enum TenantStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  TRIAL
+}
+
+enum SubscriptionTier {
+  FREE
+  STANDARD
+  PREMIUM
+  ENTERPRISE
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  LOCKED
+}
+
+model Category {
+  id          String     @id @default(uuid())
+  tenantId    String
+  parentId    String?
+  name        String
+  description String?
+  sortOrder   Int?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  tenant      Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  parent      Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children    Category[] @relation("CategoryHierarchy")
+  items       Item[]
+
+  @@unique([tenantId, name])
+  @@index([tenantId])
+  @@index([parentId])
+}
+
+model Item {
+  id                String          @id @default(uuid())
+  tenantId          String
+  code              String
+  name              String
+  shortDescription  String?
+  longDescription   String?
+  categoryId        String?
+  brand             String?
+  modelNumber       String?
+  barcode           String?
+  unitOfMeasurement String          @default("PCS")
+  purchasePrice     Decimal         @db.Decimal(18, 2)
+  sellingPrice      Decimal         @db.Decimal(18, 2)
+  wholesalePrice    Decimal?        @db.Decimal(18, 2)
+  currency          String          @default("USD")
+  taxCategoryId     String?
+  taxRate           Decimal?        @db.Decimal(5, 4)
+  status            ItemStatus      @default(ACTIVE)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  deletedAt         DateTime?
+  tenant            Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  category          Category?       @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  inventories       ItemInventory[]
+  movements         StockMovement[]
+  purchaseOrderLines PurchaseOrderLine[]
+  salesOrderLines   SalesOrderLine[]
+  salesInvoiceLines SalesInvoiceLine[]
+  purchaseInvoiceLines PurchaseInvoiceLine[]
+
+  @@unique([tenantId, code])
+  @@index([tenantId])
+  @@index([tenantId, categoryId])
+  @@index([tenantId, barcode])
+}
+
+enum ItemStatus {
+  ACTIVE
+  INACTIVE
+  DISCONTINUED
+  OUT_OF_STOCK
+}
+
+enum CustomerType {
+  INDIVIDUAL
+  COMPANY
+  GOVERNMENT
+}
+
+enum CustomerStatus {
+  ACTIVE
+  INACTIVE
+  BLOCKED
+  ON_HOLD
+}
+
+enum AddressType {
+  BILLING
+  SHIPPING
+}
+
+model Customer {
+  id              String            @id @default(uuid())
+  tenantId        String
+  code            String
+  name            String
+  customerType    CustomerType      @default(COMPANY)
+  email           String?
+  phone           String?
+  taxId           String?
+  creditLimit     Decimal?          @db.Decimal(18, 2)
+  paymentTerms    String?
+  currency        String            @default("USD")
+  defaultDiscount Decimal?          @db.Decimal(5, 4)
+  priceListId     String?
+  status          CustomerStatus    @default(ACTIVE)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  deletedAt       DateTime?
+  tenant          Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  addresses       CustomerAddress[]
+  salesInvoices   SalesInvoice[]
+  salesOrders     SalesOrder[]
+  payments        Payment[]
+
+  @@unique([tenantId, code])
+  @@index([tenantId])
+  @@index([tenantId, email])
+}
+
+model CustomerAddress {
+  id            String       @id @default(uuid())
+  customerId    String
+  tenantId      String
+  addressType   AddressType
+  streetAddress String
+  city          String
+  stateProvince String?
+  postalCode    String?
+  country       String
+  isDefault     Boolean      @default(false)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  customer      Customer     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  tenant        Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  shippingSalesOrders SalesOrder[] @relation("SalesOrderShippingAddress")
+  billingSalesOrders  SalesOrder[] @relation("SalesOrderBillingAddress")
+  shippingSalesInvoices SalesInvoice[] @relation("SalesInvoiceShippingAddress")
+  billingSalesInvoices  SalesInvoice[] @relation("SalesInvoiceBillingAddress")
+
+  @@index([tenantId])
+  @@index([customerId])
+}
+
+enum SupplierType {
+  MANUFACTURER
+  DISTRIBUTOR
+  WHOLESALER
+}
+
+enum SupplierStatus {
+  ACTIVE
+  INACTIVE
+  BLOCKED
+  ON_HOLD
+}
+
+model Supplier {
+  id                String            @id @default(uuid())
+  tenantId          String
+  code              String
+  name              String
+  supplierType      SupplierType      @default(DISTRIBUTOR)
+  email             String?
+  phone             String?
+  taxId             String?
+  paymentTerms      String?
+  currency          String            @default("USD")
+  bankName          String?
+  bankAccountNumber String?
+  bankRoutingNumber String?
+  swiftCode         String?
+  status            SupplierStatus    @default(ACTIVE)
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  deletedAt         DateTime?
+  tenant            Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  addresses         SupplierAddress[]
+  purchaseOrders    PurchaseOrder[]
+  purchaseInvoices  PurchaseInvoice[]
+  payments          Payment[]
+
+  @@unique([tenantId, code])
+  @@index([tenantId])
+}
+
+model SupplierAddress {
+  id            String       @id @default(uuid())
+  supplierId    String
+  tenantId      String
+  addressType   AddressType
+  streetAddress String
+  city          String
+  stateProvince String?
+  postalCode    String?
+  country       String
+  isDefault     Boolean      @default(false)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  supplier      Supplier     @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  tenant        Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  shippingPurchaseOrders PurchaseOrder[] @relation("PurchaseOrderShippingAddress")
+  billingPurchaseOrders  PurchaseOrder[] @relation("PurchaseOrderBillingAddress")
+  shippingPurchaseInvoices PurchaseInvoice[] @relation("PurchaseInvoiceShippingAddress")
+  billingPurchaseInvoices  PurchaseInvoice[] @relation("PurchaseInvoiceBillingAddress")
+
+  @@index([tenantId])
+  @@index([supplierId])
+}
+
+// ============================================
+// Phase 3: Inventory Management
+// ============================================
+
+enum LocationStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum StockMovementType {
+  INBOUND
+  OUTBOUND
+  ADJUSTMENT
+  TRANSFER
+  DAMAGE
+}
+
+model InventoryLocation {
+  id        String            @id @default(uuid())
+  tenantId  String
+  code      String
+  name      String
+  address   String?
+  isDefault Boolean           @default(false)
+  status    LocationStatus    @default(ACTIVE)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+  tenant    Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  inventories ItemInventory[]
+  movements   StockMovement[]
+
+  @@unique([tenantId, code])
+  @@index([tenantId])
+}
+
+model ItemInventory {
+  id                String          @id @default(uuid())
+  tenantId          String
+  itemId            String
+  locationId        String
+  quantity          Decimal         @default(0) @db.Decimal(18, 4)
+  reservedQuantity  Decimal         @default(0) @db.Decimal(18, 4)
+  availableQuantity Decimal         @default(0) @db.Decimal(18, 4) // Calculated: quantity - reservedQuantity
+  minimumStockLevel Decimal?        @db.Decimal(18, 4)
+  maximumStockLevel Decimal?        @db.Decimal(18, 4)
+  reorderPoint      Decimal?        @db.Decimal(18, 4)
+  lastCountedAt     DateTime?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  tenant            Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  item              Item            @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  location          InventoryLocation @relation(fields: [locationId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, itemId, locationId])
+  @@index([tenantId])
+  @@index([tenantId, itemId])
+  @@index([tenantId, locationId])
+}
+
+model StockMovement {
+  id            String            @id @default(uuid())
+  tenantId      String
+  itemId        String
+  locationId    String
+  movementType  StockMovementType
+  movementDate  DateTime
+  quantity      Decimal           @db.Decimal(18, 4) // Positive for inbound, negative for outbound
+  quantityBefore Decimal          @db.Decimal(18, 4)
+  quantityAfter  Decimal          @db.Decimal(18, 4)
+  referenceType String?           // invoice, purchase_order, sales_order, adjustment, transfer
+  referenceId   String?           // ID of reference document
+  costPerUnit   Decimal?          @db.Decimal(18, 4)
+  totalCost     Decimal?          @db.Decimal(18, 4)
+  reason        String?
+  createdById   String?
+  createdAt     DateTime          @default(now())
+  tenant        Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  item          Item              @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  location      InventoryLocation @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  createdBy     User?             @relation(fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([tenantId])
+  @@index([tenantId, itemId])
+  @@index([tenantId, locationId])
+  @@index([tenantId, movementDate])
+  @@index([tenantId, referenceType, referenceId])
+}
+
+// ============================================
+// Phase 4: Purchase Orders
+// ============================================
+
+enum PurchaseOrderStatus {
+  DRAFT
+  SENT
+  CONFIRMED
+  PARTIALLY_RECEIVED
+  COMPLETED
+  CANCELLED
+}
+
+model PurchaseOrder {
+  id                   String               @id @default(uuid())
+  tenantId             String
+  poNumber             String
+  poDate               DateTime
+  expectedDeliveryDate DateTime?
+  supplierId           String
+  supplierReference    String?
+  shippingAddressId    String?
+  billingAddressId     String?
+  paymentTerms         String?
+  currency             String
+  subtotal             Decimal              @db.Decimal(18, 2)
+  discountAmount       Decimal              @default(0) @db.Decimal(18, 2)
+  taxAmount            Decimal              @default(0) @db.Decimal(18, 2)
+  shippingCharges      Decimal              @default(0) @db.Decimal(18, 2)
+  grandTotal           Decimal              @db.Decimal(18, 2)
+  status               PurchaseOrderStatus  @default(DRAFT)
+  notes                String?
+  createdById          String?
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+  deletedAt            DateTime?
+  tenant               Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  supplier             Supplier             @relation(fields: [supplierId], references: [id], onDelete: Restrict)
+  shippingAddress      SupplierAddress?     @relation("PurchaseOrderShippingAddress", fields: [shippingAddressId], references: [id], onDelete: SetNull)
+  billingAddress       SupplierAddress?     @relation("PurchaseOrderBillingAddress", fields: [billingAddressId], references: [id], onDelete: SetNull)
+  createdBy            User?                @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  lines                PurchaseOrderLine[]
+  purchaseInvoices     PurchaseInvoice[]
+
+  @@unique([tenantId, poNumber])
+  @@index([tenantId])
+  @@index([tenantId, supplierId])
+  @@index([tenantId, status])
+  @@index([tenantId, poDate])
+}
+
+model PurchaseOrderLine {
+  id                String         @id @default(uuid())
+  tenantId          String
+  purchaseOrderId   String
+  itemId            String
+  lineNumber        Int
+  description       String?
+  quantityOrdered   Decimal        @db.Decimal(18, 4)
+  quantityReceived  Decimal        @default(0) @db.Decimal(18, 4)
+  unitPrice         Decimal        @db.Decimal(18, 4)
+  discountPercentage Decimal       @default(0) @db.Decimal(5, 4)
+  discountAmount    Decimal        @default(0) @db.Decimal(18, 4)
+  taxRate           Decimal        @default(0) @db.Decimal(5, 4)
+  taxAmount         Decimal        @default(0) @db.Decimal(18, 4)
+  lineTotal         Decimal        @db.Decimal(18, 4)
+  expectedDeliveryDate DateTime?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  tenant            Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  purchaseOrder     PurchaseOrder  @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+  item              Item           @relation(fields: [itemId], references: [id], onDelete: Restrict)
+
+  @@index([tenantId])
+  @@index([tenantId, purchaseOrderId])
+  @@index([tenantId, itemId])
+}
+
+// ============================================
+// Phase 5: Sales Orders
+// ============================================
+
+enum SalesOrderStatus {
+  DRAFT
+  CONFIRMED
+  PARTIALLY_DELIVERED
+  COMPLETED
+  CANCELLED
+}
+
+model SalesOrder {
+  id                   String            @id @default(uuid())
+  tenantId             String
+  soNumber             String
+  soDate               DateTime
+  expectedDeliveryDate DateTime?
+  customerId           String
+  customerReference    String?
+  shippingAddressId    String?
+  billingAddressId     String?
+  paymentTerms         String?
+  currency             String
+  subtotal             Decimal           @db.Decimal(18, 2)
+  discountAmount       Decimal           @default(0) @db.Decimal(18, 2)
+  taxAmount            Decimal           @default(0) @db.Decimal(18, 2)
+  shippingCharges      Decimal           @default(0) @db.Decimal(18, 2)
+  grandTotal           Decimal           @db.Decimal(18, 2)
+  status               SalesOrderStatus  @default(DRAFT)
+  notes                String?
+  createdById          String?
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+  deletedAt            DateTime?
+  tenant               Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  customer             Customer          @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  shippingAddress      CustomerAddress?  @relation("SalesOrderShippingAddress", fields: [shippingAddressId], references: [id], onDelete: SetNull)
+  billingAddress       CustomerAddress?  @relation("SalesOrderBillingAddress", fields: [billingAddressId], references: [id], onDelete: SetNull)
+  createdBy            User?             @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  lines                SalesOrderLine[]
+  salesInvoices        SalesInvoice[]
+
+  @@unique([tenantId, soNumber])
+  @@index([tenantId])
+  @@index([tenantId, customerId])
+  @@index([tenantId, status])
+  @@index([tenantId, soDate])
+}
+
+model SalesOrderLine {
+  id                String        @id @default(uuid())
+  tenantId          String
+  salesOrderId      String
+  itemId            String
+  lineNumber        Int
+  description       String?
+  quantityOrdered   Decimal       @db.Decimal(18, 4)
+  quantityDelivered Decimal       @default(0) @db.Decimal(18, 4)
+  unitPrice         Decimal       @db.Decimal(18, 4)
+  discountPercentage Decimal      @default(0) @db.Decimal(5, 4)
+  discountAmount    Decimal       @default(0) @db.Decimal(18, 4)
+  taxRate           Decimal       @default(0) @db.Decimal(5, 4)
+  taxAmount         Decimal       @default(0) @db.Decimal(18, 4)
+  lineTotal         Decimal       @db.Decimal(18, 4)
+  expectedDeliveryDate DateTime?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  tenant            Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  salesOrder        SalesOrder    @relation(fields: [salesOrderId], references: [id], onDelete: Cascade)
+  item              Item          @relation(fields: [itemId], references: [id], onDelete: Restrict)
+
+  @@index([tenantId])
+  @@index([tenantId, salesOrderId])
+  @@index([tenantId, itemId])
+}
+
+// ============================================
+// Phase 6: Invoicing
+// ============================================
+
+enum SalesInvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  PARTIALLY_PAID
+  OVERDUE
+  CANCELLED
+}
+
+model SalesInvoice {
+  id                String              @id @default(uuid())
+  tenantId          String
+  invoiceNumber     String
+  invoiceDate       DateTime
+  dueDate           DateTime
+  customerId        String
+  salesOrderId      String?
+  shippingAddressId String?
+  billingAddressId  String?
+  paymentTerms      String?
+  currency          String
+  referenceNumber   String?
+  subtotal          Decimal             @db.Decimal(18, 2)
+  discountAmount    Decimal             @default(0) @db.Decimal(18, 2)
+  taxAmount         Decimal             @default(0) @db.Decimal(18, 2)
+  shippingCharges   Decimal             @default(0) @db.Decimal(18, 2)
+  grandTotal        Decimal             @db.Decimal(18, 2)
+  amountPaid        Decimal             @default(0) @db.Decimal(18, 2)
+  balanceDue        Decimal             @db.Decimal(18, 2)
+  status            SalesInvoiceStatus  @default(DRAFT)
+  notes             String?
+  termsConditions   String?
+  createdById       String?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  deletedAt         DateTime?
+  tenant            Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  customer          Customer            @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  salesOrder        SalesOrder?         @relation(fields: [salesOrderId], references: [id], onDelete: SetNull)
+  shippingAddress   CustomerAddress?    @relation("SalesInvoiceShippingAddress", fields: [shippingAddressId], references: [id], onDelete: SetNull)
+  billingAddress    CustomerAddress?    @relation("SalesInvoiceBillingAddress", fields: [billingAddressId], references: [id], onDelete: SetNull)
+  createdBy         User?               @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  lines             SalesInvoiceLine[]
+
+  @@unique([tenantId, invoiceNumber])
+  @@index([tenantId])
+  @@index([tenantId, customerId])
+  @@index([tenantId, status])
+  @@index([tenantId, invoiceDate])
+  @@index([tenantId, dueDate])
+}
+
+model SalesInvoiceLine {
+  id              String        @id @default(uuid())
+  tenantId        String
+  salesInvoiceId  String
+  itemId          String?
+  lineNumber      Int
+  description     String
+  quantity        Decimal       @db.Decimal(18, 4)
+  unitPrice       Decimal       @db.Decimal(18, 4)
+  discountPercentage Decimal    @default(0) @db.Decimal(5, 4)
+  discountAmount  Decimal       @default(0) @db.Decimal(18, 4)
+  taxRate         Decimal       @default(0) @db.Decimal(5, 4)
+  taxAmount       Decimal       @default(0) @db.Decimal(18, 4)
+  lineTotal       Decimal       @db.Decimal(18, 4)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  tenant          Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  salesInvoice    SalesInvoice @relation(fields: [salesInvoiceId], references: [id], onDelete: Cascade)
+  item            Item?         @relation(fields: [itemId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId])
+  @@index([tenantId, salesInvoiceId])
+  @@index([tenantId, itemId])
+}
+
+enum PurchaseInvoiceStatus {
+  DRAFT
+  RECEIVED
+  APPROVED
+  PAID
+  PARTIALLY_PAID
+  OVERDUE
+  CANCELLED
+}
+
+model PurchaseInvoice {
+  id                String                @id @default(uuid())
+  tenantId          String
+  invoiceNumber     String
+  invoiceDate       DateTime
+  dueDate           DateTime
+  supplierId        String
+  purchaseOrderId   String?
+  shippingAddressId String?
+  billingAddressId  String?
+  paymentTerms      String?
+  currency          String
+  referenceNumber   String?
+  subtotal          Decimal               @db.Decimal(18, 2)
+  discountAmount    Decimal               @default(0) @db.Decimal(18, 2)
+  taxAmount         Decimal               @default(0) @db.Decimal(18, 2)
+  shippingCharges   Decimal               @default(0) @db.Decimal(18, 2)
+  grandTotal        Decimal               @db.Decimal(18, 2)
+  amountPaid        Decimal               @default(0) @db.Decimal(18, 2)
+  balanceDue        Decimal               @db.Decimal(18, 2)
+  status            PurchaseInvoiceStatus  @default(DRAFT)
+  notes             String?
+  createdById       String?
+  approvedById      String?
+  approvedAt        DateTime?
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+  deletedAt         DateTime?
+  tenant            Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  supplier          Supplier              @relation(fields: [supplierId], references: [id], onDelete: Restrict)
+  purchaseOrder     PurchaseOrder?        @relation(fields: [purchaseOrderId], references: [id], onDelete: SetNull)
+  shippingAddress   SupplierAddress?      @relation("PurchaseInvoiceShippingAddress", fields: [shippingAddressId], references: [id], onDelete: SetNull)
+  billingAddress    SupplierAddress?      @relation("PurchaseInvoiceBillingAddress", fields: [billingAddressId], references: [id], onDelete: SetNull)
+  createdBy         User?                 @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  approvedBy        User?                 @relation("PurchaseInvoiceApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull)
+  lines             PurchaseInvoiceLine[]
+
+  @@unique([tenantId, invoiceNumber])
+  @@index([tenantId])
+  @@index([tenantId, supplierId])
+  @@index([tenantId, status])
+  @@index([tenantId, invoiceDate])
+  @@index([tenantId, dueDate])
+}
+
+model PurchaseInvoiceLine {
+  id                String          @id @default(uuid())
+  tenantId          String
+  purchaseInvoiceId String
+  itemId            String?
+  lineNumber        Int
+  description       String
+  quantityReceived  Decimal         @db.Decimal(18, 4)
+  unitCost          Decimal         @db.Decimal(18, 4)
+  discountPercentage Decimal        @default(0) @db.Decimal(5, 4)
+  discountAmount    Decimal         @default(0) @db.Decimal(18, 4)
+  taxRate           Decimal         @default(0) @db.Decimal(5, 4)
+  taxAmount         Decimal         @default(0) @db.Decimal(18, 4)
+  lineTotal         Decimal         @db.Decimal(18, 4)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  tenant            Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  purchaseInvoice   PurchaseInvoice @relation(fields: [purchaseInvoiceId], references: [id], onDelete: Cascade)
+  item              Item?           @relation(fields: [itemId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId])
+  @@index([tenantId, purchaseInvoiceId])
+  @@index([tenantId, itemId])
+}
+
+// ============================================
+// Phase 7: Payments & Financial Management
+// ============================================
+
+enum PaymentType {
+  CUSTOMER_PAYMENT
+  SUPPLIER_PAYMENT
+}
+
+enum PaymentMethod {
+  CASH
+  BANK_TRANSFER
+  CHECK
+  CREDIT_CARD
+  OTHER
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum InvoiceType {
+  SALES_INVOICE
+  PURCHASE_INVOICE
+}
+
+model Payment {
+  id              String        @id @default(uuid())
+  tenantId        String
+  paymentNumber   String
+  paymentDate     DateTime
+  paymentType     PaymentType
+  customerId      String?
+  supplierId      String?
+  paymentMethod   PaymentMethod
+  amount          Decimal       @db.Decimal(18, 2)
+  currency        String
+  referenceNumber String?
+  bankAccount     String?
+  notes           String?
+  status          PaymentStatus @default(PENDING)
+  createdById     String?
+  approvedById    String?
+  approvedAt      DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  deletedAt       DateTime?
+  tenant          Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  customer        Customer?     @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  supplier        Supplier?     @relation(fields: [supplierId], references: [id], onDelete: SetNull)
+  createdBy       User?         @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  approvedBy      User?         @relation("PaymentApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull)
+  allocations     PaymentAllocation[]
+
+  @@unique([tenantId, paymentNumber])
+  @@index([tenantId])
+  @@index([tenantId, customerId])
+  @@index([tenantId, supplierId])
+  @@index([tenantId, paymentDate])
+  @@index([tenantId, paymentType])
+  @@index([tenantId, status])
+}
+
+model PaymentAllocation {
+  id            String        @id @default(uuid())
+  tenantId      String
+  paymentId     String
+  invoiceType   InvoiceType
+  invoiceId     String
+  amountAllocated Decimal     @db.Decimal(18, 2)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  tenant        Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  payment       Payment        @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, paymentId])
+  @@index([tenantId, invoiceType, invoiceId])
+}

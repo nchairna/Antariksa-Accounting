@@ -1,0 +1,65 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Import fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* TODO: Add your custom font imports here if not using Inter */
+/* Example:
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+*/
+
+@layer base {
+  :root {
+    /* Use theme colors as CSS variables for dynamic theming */
+    --color-primary-50: theme('colors.primary.50');
+    --color-primary-500: theme('colors.primary.500');
+    --color-primary-600: theme('colors.primary.600');
+    
+    /* Typography */
+    font-family: theme('fontFamily.sans');
+    font-size: theme('fontSize.base');
+    line-height: theme('lineHeight.normal');
+    color: theme('colors.gray.900');
+    background-color: theme('colors.background.default');
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background-color: inherit;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Ensure proper focus styles for accessibility */
+  *:focus-visible {
+    outline: 2px solid theme('colors.primary.500');
+    outline-offset: 2px;
+  }
+
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer components {
+  /* Reusable component styles can go here */
+  .btn-primary {
+    @apply bg-primary-500 text-white font-medium px-4 py-2 rounded-md hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors;
+  }
+
+  .btn-secondary {
+    @apply bg-gray-200 text-gray-900 font-medium px-4 py-2 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors;
+  }
+
+  .input-base {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent;
+  }
+
+  .card {
+    @apply bg-white rounded-lg shadow-md p-6;
+  }
+}
