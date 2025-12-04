@@ -76,17 +76,15 @@ export async function tenantContextMiddleware(
         return next();
       }
 
-      // For auth endpoints (register/login), allow without tenant context
-      // They will get tenant ID from request body or will be set during registration
-      if (req.path.startsWith("/api/auth/register") || req.path.startsWith("/api/auth/login")) {
-        // For login/register, we still need tenant context, but it can come from body
-        // Let's check if it's in the body
-        const bodyTenantId = (req.body as any)?.tenantId;
-        if (bodyTenantId) {
-          await prisma.$executeRawUnsafe(`SET app.current_tenant_id = '${bodyTenantId}'`);
-          (req as any).tenantId = bodyTenantId;
-          return next();
-        }
+      // For auth endpoints (signup/register/login), let the controllers handle tenant context themselves.
+      // - Signup creates a new tenant, so no tenant context is needed here.
+      // - Register/login can resolve tenant from body (tenantId or companyCode) and set context in services.
+      if (
+        req.path.startsWith("/api/auth/signup") ||
+        req.path.startsWith("/api/auth/register") ||
+        req.path.startsWith("/api/auth/login")
+      ) {
+        return next();
       }
 
       // Otherwise, require tenant ID

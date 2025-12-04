@@ -1,7 +1,8 @@
 /**
- * Antariksa Accounting - Theme Configuration
+ * Countin - Theme Configuration
  * 
- * Industry-standard design tokens following:
+ * Minimalistic black & white design with industry-standard soft grays for borders.
+ * Following:
  * - Material Design 3 principles
  * - WCAG 2.1 AA accessibility standards
  * - Responsive design best practices
@@ -165,20 +166,20 @@ export interface Theme {
   }
 }
 
-// Default theme (can be extended for dark mode)
+// Default theme - Minimalistic black & white with soft grays
 export const defaultTheme: Theme = {
   colors: {
     primary: {
-      50: '#eff6ff',
-      100: '#dbeafe',
-      200: '#bfdbfe',
-      300: '#93c5fd',
-      400: '#60a5fa',
-      500: '#3b82f6', // Main brand color - UPDATE THIS
-      600: '#2563eb',
-      700: '#1d4ed8',
-      800: '#1e40af',
-      900: '#1e3a8a',
+      50: '#f9fafb', // Very light gray
+      100: '#f3f4f6', // Light gray
+      200: '#e5e7eb', // Soft gray for borders
+      300: '#d1d5db', // Medium-light gray
+      400: '#9ca3af', // Medium gray
+      500: '#000000', // Black - main brand color (minimalistic)
+      600: '#111827', // Very dark gray (almost black)
+      700: '#1f2937', // Dark gray
+      800: '#374151', // Darker gray
+      900: '#000000', // Pure black
     },
     success: {
       50: '#f0fdf4',
@@ -209,38 +210,38 @@ export const defaultTheme: Theme = {
       700: '#1d4ed8',
     },
     gray: {
-      50: '#f9fafb',
-      100: '#f3f4f6',
-      200: '#e5e7eb',
-      300: '#d1d5db',
-      400: '#9ca3af',
-      500: '#6b7280',
-      600: '#4b5563',
-      700: '#374151',
-      800: '#1f2937',
-      900: '#111827',
+      50: '#fafafa',   // Very light gray (almost white)
+      100: '#f5f5f5',  // Light gray
+      200: '#e5e5e5',  // Soft gray for borders (industry standard)
+      300: '#d4d4d4',  // Medium-light gray
+      400: '#a3a3a3',  // Medium gray
+      500: '#737373',  // Neutral gray
+      600: '#525252',  // Medium-dark gray
+      700: '#404040',  // Dark gray
+      800: '#262626',  // Very dark gray
+      900: '#171717',  // Almost black
     },
     background: {
-      default: '#f9fafb',
-      paper: '#ffffff',
-      elevated: '#ffffff',
+      default: '#ffffff', // White background
+      paper: '#ffffff',   // White paper/cards
+      elevated: '#fafafa', // Slightly elevated surfaces
     },
     text: {
-      primary: '#111827',
-      secondary: '#6b7280',
-      disabled: '#9ca3af',
-      inverse: '#ffffff',
+      primary: '#000000',   // Black text
+      secondary: '#525252',  // Dark gray for secondary text
+      disabled: '#a3a3a3',  // Medium gray for disabled
+      inverse: '#ffffff',   // White text (for dark backgrounds)
     },
     border: {
-      default: '#e5e7eb',
-      light: '#f3f4f6',
-      dark: '#d1d5db',
+      default: '#e5e5e5', // Soft gray border (industry standard)
+      light: '#f5f5f5',  // Very light border
+      dark: '#d4d4d4',    // Slightly darker border
     },
   },
   typography: {
     fontFamily: {
-      primary: '"Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif', // UPDATE THIS
-      secondary: '"Inter", sans-serif', // UPDATE THIS
+      primary: '"Outfit", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+      secondary: '"Outfit", sans-serif',
       mono: '"Fira Code", "Courier New", monospace',
     },
     fontSize: {

@@ -32,16 +32,24 @@
 - **Search** (Global search bar)
 
 ### 1.2 Sidebar Navigation (Desktop)
-- Dashboard
-- Master Data
-- Inventory
-- Purchase Orders (PO)
-- Sales Orders (SO)
-- Invoices
-- Accounts Receivable (AR)
-- Accounts Payable (AP)
-- Reports
-- Settings
+- **🏠 Dashboard**
+  - Dashboard
+- **📦 Master Data**
+  - Items
+  - Customers
+  - Suppliers
+- **🧾 Operations**
+  - Sales Orders
+  - Purchase Orders
+  - Inventory
+- **💰 Finance**
+  - Sales Invoices
+  - Purchase Invoices
+  - Payments
+- **📊 Reports**
+  - Reports home (entry point to all report screens)
+- **⚙️ Settings**
+  - Global/settings area (company, users, roles, system config)
 
 ---
 

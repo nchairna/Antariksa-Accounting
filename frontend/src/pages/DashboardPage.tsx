@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import api from '../lib/api'
 
 interface DashboardStats {
   totalSales: number
@@ -31,7 +30,7 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Loading dashboard...</div>
+        <div className="text-gray-500 dark:text-gray-400">Loading dashboard...</div>
       </div>
     )
   }
@@ -47,16 +46,16 @@ export default function DashboardPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Dashboard</h1>
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Dashboard</h1>
       
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         {statCards.map((card) => (
-          <div key={card.name} className="bg-white rounded-lg shadow p-6">
+          <div key={card.name} className="bg-white dark:bg-black rounded-lg border border-gray-200 dark:border-gray-800 shadow p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">{card.name}</p>
-                <p className="text-2xl font-bold text-gray-900 mt-2">
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{card.name}</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white mt-2">
                   {typeof card.value === 'number' 
                     ? card.value.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
                     : card.value}
@@ -71,9 +70,9 @@ export default function DashboardPage() {
       </div>
 
       {/* Recent Activity Placeholder */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h2>
-        <p className="text-gray-500">Recent invoices, orders, and payments will appear here.</p>
+      <div className="bg-white dark:bg-black rounded-lg border border-gray-200 dark:border-gray-800 shadow p-6">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Recent Activity</h2>
+        <p className="text-gray-500 dark:text-gray-400">Recent invoices, orders, and payments will appear here.</p>
       </div>
     </div>
   )

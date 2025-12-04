@@ -2,41 +2,47 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Import fonts */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
-/* TODO: Add your custom font imports here if not using Inter */
-/* Example:
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-*/
+/* Import Outfit font from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
 
 @layer base {
   :root {
-    /* Use theme colors as CSS variables for dynamic theming */
-    --color-primary-50: theme('colors.primary.50');
-    --color-primary-500: theme('colors.primary.500');
-    --color-primary-600: theme('colors.primary.600');
+    /* Countin - Minimalistic black & white theme */
+    --color-primary-500: #000000; /* Black */
+    --color-primary-600: #111827;
     
     /* Typography */
     font-family: theme('fontFamily.sans');
     font-size: theme('fontSize.base');
     line-height: theme('lineHeight.normal');
-    color: theme('colors.gray.900');
-    background-color: theme('colors.background.default');
+    color: #000000; /* Black text */
+    background-color: #ffffff; /* White background */
+  }
+
+  /* Dark mode */
+  .dark {
+    color: #ffffff; /* White text */
+    background-color: #000000; /* Black background */
   }
 
   body {
     margin: 0;
     min-height: 100vh;
     background-color: inherit;
+    color: inherit;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    transition: background-color 0.2s ease, color 0.2s ease;
   }
 
   /* Ensure proper focus styles for accessibility */
   *:focus-visible {
     outline: 2px solid theme('colors.primary.500');
     outline-offset: 2px;
+  }
+
+  .dark *:focus-visible {
+    outline-color: #ffffff; /* White outline in dark mode */
   }
 
   /* Smooth scrolling */
@@ -46,20 +52,20 @@
 }
 
 @layer components {
-  /* Reusable component styles can go here */
+  /* Reusable component styles - Countin minimalistic design */
   .btn-primary {
-    @apply bg-primary-500 text-white font-medium px-4 py-2 rounded-md hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors;
+    @apply bg-black text-white font-medium px-4 py-2 rounded-md hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 transition-colors dark:bg-white dark:text-black dark:hover:bg-gray-100 dark:focus:ring-white;
   }
 
   .btn-secondary {
-    @apply bg-gray-200 text-gray-900 font-medium px-4 py-2 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors;
+    @apply bg-white border border-gray-200 text-black font-medium px-4 py-2 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 transition-colors dark:bg-black dark:border-gray-800 dark:text-white dark:hover:bg-gray-900 dark:focus:ring-white;
   }
 
   .input-base {
-    @apply w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent;
+    @apply w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-black transition-colors bg-white text-black dark:bg-black dark:border-gray-800 dark:text-white dark:focus:ring-white dark:focus:border-white;
   }
 
   .card {
-    @apply bg-white rounded-lg shadow-md p-6;
+    @apply bg-white rounded-lg border border-gray-200 p-6 dark:bg-black dark:border-gray-800;
   }
 }

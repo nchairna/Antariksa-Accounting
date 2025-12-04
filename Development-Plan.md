@@ -193,6 +193,13 @@ This document outlines the comprehensive development plan for the Antariksa Acco
   - ✅ Password hashing with bcrypt
   - ✅ Input validation with Zod
   - ✅ Tenant isolation enforced
+- [x] Implement public tenant + first-user signup - **DONE: POST /api/auth/signup endpoint**
+  - ✅ Combined tenant + user registration (creates tenant + first user in one flow)
+  - ✅ Auto-generates human-readable company code when not provided
+  - ✅ Returns tenant, user, and JWT token for immediate login
+- [x] Support company code for employee invites - **DONE: POST /api/auth/register accepts companyCode**
+  - ✅ User registration can target tenant by UUID `tenantId` or human-readable `companyCode`
+  - ✅ Backward compatible with existing flows
 - [x] Implement login/logout - **DONE: POST /api/auth/login and POST /api/auth/logout**
   - ✅ JWT token generation on login
   - ✅ Session management in database
@@ -1222,20 +1229,23 @@ This document outlines the comprehensive development plan for the Antariksa Acco
   - [x] TypeScript configuration
   - [x] Tailwind CSS configured
   - [x] Folder structure (layouts, pages, stores, lib)
-- [ ] Set up global theming (colors, typography, spacing, light/dark mode ready) ⏳ **IN PROGRESS**
-  - [ ] Design tokens configuration (colors, typography, spacing)
-  - [ ] Logo integration
-  - [ ] Font configuration
-  - [ ] Theme provider setup
-  - [ ] Dark mode support (ready for implementation)
+- [x] Set up global theming (colors, typography, spacing, light/dark mode ready) ✅ **COMPLETE**
+  - [x] Design tokens configuration (colors, typography, spacing) ✅
+  - [x] Logo integration ✅ **COMPLETE** - Black and white logo variants configured
+  - [x] Brand configuration ✅ **COMPLETE** - Countin branding set up
+  - [x] Minimalistic color system ✅ **COMPLETE** - Black/white with soft grays
+  - [x] Font configuration ✅ **COMPLETE** - Outfit font implemented across all configs
+  - [x] Dark mode support ✅ **COMPLETE** - Class-based dark mode with theme toggle and persistence
 - [x] Define responsive layout grid & breakpoints ✅ **COMPLETE**
   - [x] Desktop-first layout (≥ 1200px) - Tailwind breakpoints configured
   - [x] Tablet layout (768–1199px) - Responsive utilities ready
   - [x] Mobile layout (≤ 767px) - Mobile drawer navigation implemented
 - [x] Build core reusable components ✅ **PARTIAL**
   - [x] Layout shell (DashboardLayout with header, sidebar, content area) ✅
-  - [x] Login page with form validation ✅
+  - [x] Login page with form validation ✅ **COMPLETE** - Logo integrated, minimalistic design
+  - [x] Registration page with two-step signup ✅ **COMPLETE** - User info → company name, auto-generated username, wired to `/api/auth/signup`
   - [x] Dashboard page placeholder ✅
+  - [x] BrandLogo component ✅ **COMPLETE** - Supports black/white variants, multiple sizes
   - [ ] Cards, tables, filters, form controls (inputs, selects, date pickers) ⏳ **TODO**
   - [ ] Toasts/notifications, modal dialogs, confirmation prompts ⏳ **TODO**
 - [x] Authentication & routing ✅ **COMPLETE**
@@ -1247,9 +1257,15 @@ This document outlines the comprehensive development plan for the Antariksa Acco
 #### 9.2 Application Shell, Navigation & Auth (Desktop-first) ✅ **PARTIAL**
 - [x] Implement authenticated app shell ✅ **COMPLETE**
   - [x] Top bar with user menu ✅
-  - [x] Left sidebar navigation (Dashboard, Items, Customers, Suppliers, Inventory, PO, SO, Invoices, Payments, Reports, Settings) ✅
+  - [x] Left sidebar navigation grouped by domain ✅  
+    - 🏠 Dashboard  
+    - 📦 Master Data (Items, Customers, Suppliers)  
+    - 🧾 Operations (Sales Orders, Purchase Orders, Inventory)  
+    - 💰 Finance (Sales Invoices, Purchase Invoices, Payments)  
+    - 📊 Reports  
+    - ⚙️ Settings  
   - [x] Route-level auth guard that checks JWT ✅
-  - [ ] Logo/home integration ⏳ **TODO: Waiting for logo asset**
+  - [x] Logo/home integration ✅ **COMPLETE** - Logo integrated in sidebar and login page
   - [ ] Search functionality ⏳ **TODO**
   - [ ] Notifications dropdown ⏳ **TODO**
 - [x] Implement responsive navigation behavior ✅ **COMPLETE**
@@ -1308,7 +1324,21 @@ This document outlines the comprehensive development plan for the Antariksa Acco
 - ⏳ Mobile-friendly flows for checking inventory and order/invoice/payment status (Phase 9.4)
 - ⏳ Solid UX foundation: loading states, error handling, and baseline accessibility (Phase 9.5)
 
-**Phase 9 Status**: ✅ **9.1 IN PROGRESS** - Foundation complete, theming system ready, testing setup done
+**Phase 9 Status**: ✅ **9.1 COMPLETE** - Foundation complete, theming system fully implemented, testing setup done
+
+**Recent Accomplishments**:
+- ✅ Logo system implemented (black/white variants with auto-switching)
+- ✅ Countin branding configured throughout app
+- ✅ Minimalistic black/white color system with soft grays
+- ✅ Outfit font implemented (Google Fonts integration)
+- ✅ Dark mode support complete (class-based with theme toggle)
+- ✅ Theme persistence (localStorage)
+- ✅ All components updated with dark mode classes
+- ✅ BrandLogo auto-switches logo variant based on dark mode
+- ✅ ThemeToggle component created and integrated
+- ✅ Combined tenant + user signup API (`POST /api/auth/signup`) implemented and tested
+- ✅ Two-step registration UI (`RegisterPage`) wired to signup API with auto-generated username
+- ✅ Company code support added for inviting employees to existing tenants
 
 ---
 

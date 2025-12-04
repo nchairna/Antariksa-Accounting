@@ -6,7 +6,7 @@ describe('BrandLogo', () => {
   it('renders logo component', () => {
     render(<BrandLogo />)
     // This is a placeholder test - update when logo is added
-    expect(screen.getByText('Antariksa Accounting')).toBeInTheDocument()
+    expect(screen.getByText('Countin')).toBeInTheDocument()
   })
 })
 

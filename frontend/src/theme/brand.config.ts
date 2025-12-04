@@ -1,33 +1,35 @@
 /**
- * Antariksa Accounting - Brand Configuration
+ * Countin - Brand Configuration
  * 
  * Configure your brand assets here:
  * - Logo files (SVG, PNG)
  * - Brand colors
  * - Typography preferences
+ * 
+ * Note: Base branding is "Countin". Tenants can customize their company name/logo later,
+ * but "Countin" branding will always be present.
  */
 
 export interface BrandConfig {
   // Logo configuration
   logo: {
-    // Path to logo file (place in public/ folder)
-    // Example: '/logo.svg' or '/logo.png'
-    primary: string
-    // Optional: Logo for dark mode
-    dark?: string
+    // Black logo (for light backgrounds) - place in public/logo-black.svg
+    black: string
+    // White logo (for dark backgrounds) - place in public/logo-white.svg
+    white: string
     // Optional: Icon/favicon version
     icon?: string
     // Alt text for accessibility
     alt: string
   }
   
-  // Brand name
+  // Brand name (always "Countin" - tenants can add their company name separately)
   name: string
   
   // Brand tagline (optional)
   tagline?: string
   
-  // Primary brand color (should match theme.colors.primary[500])
+  // Primary brand color (black for minimalistic design)
   primaryColor: string
   
   // Font preferences
@@ -44,20 +46,19 @@ export interface BrandConfig {
   favicon?: string
 }
 
-// TODO: Update these values with your actual brand assets
+// Countin brand configuration
 export const brandConfig: BrandConfig = {
   logo: {
-    primary: '/logo.svg', // TODO: Add your logo file to public/logo.svg
-    alt: 'Antariksa Accounting Logo',
+    black: '/logo-black.svg', // Place your black logo here: public/logo-black.svg
+    white: '/logo-white.svg', // Place your white logo here: public/logo-white.svg
+    alt: 'Countin Logo',
   },
-  name: 'Antariksa Accounting',
+  name: 'Countin',
   tagline: 'Streamline your accounting operations',
-  primaryColor: '#3b82f6', // TODO: Update with your brand color
+  primaryColor: '#000000', // Black - minimalistic design
   fonts: {
-    primary: '"Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-    // Optional: heading: '"Poppins", sans-serif',
-    // Optional: mono: '"Fira Code", monospace',
+    primary: '"Outfit", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
   },
-  favicon: '/favicon.svg', // TODO: Add your favicon to public/favicon.svg
+  favicon: '/favicon.svg', // Place your favicon here: public/favicon.svg
 }
 

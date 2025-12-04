@@ -25,6 +25,7 @@
     "vitest": "^4.0.15"
   },
   "dependencies": {
+    "@fontsource/outfit": "^5.2.8",
     "@hookform/resolvers": "^5.2.2",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",

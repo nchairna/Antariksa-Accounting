@@ -5,7 +5,7 @@
  */
 
 import { Router } from "express";
-import { register, login, logout, getCurrentUser } from "../controllers/auth.controller";
+import { signup, register, login, logout, getCurrentUser } from "../controllers/auth.controller";
 import { authenticateToken } from "../middleware/auth.middleware";
 
 const router = Router();
@@ -13,6 +13,10 @@ const router = Router();
 /**
  * Public routes (require tenant context but not authentication)
  */
+
+// Signup: Create tenant and first user (public registration)
+// POST /api/auth/signup
+router.post("/signup", signup);
 
 // Register user (admin-created users)
 // POST /api/auth/register

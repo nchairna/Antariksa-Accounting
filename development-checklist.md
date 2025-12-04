@@ -101,6 +101,15 @@ This document tracks the progress of development tasks as they are completed.
   - Tenant context middleware updated
   - Extracts tenant ID from JWT (Priority 1)
   - Falls back to header (Priority 2)
+  - [x] Implement combined tenant + first-user signup
+  - Endpoint: `POST /api/auth/signup`
+  - Creates tenant and first user in a single flow
+  - Auto-generates human-readable company code when not provided
+  - Returns tenant, user, and JWT token for immediate login
+- [x] Support company code for employee invites
+  - `POST /api/auth/register` accepts either `tenantId` (UUID) or `companyCode`
+  - Keeps existing flows backward compatible
+  - Enables simple, human-readable invite links based on company code
 
 #### Pending (Future Phases)
 - [ ] Create role-based access control (RBAC) - **Phase 2: Authorization middleware**
